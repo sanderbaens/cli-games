@@ -3,7 +3,7 @@ from .getList import getList
 from .table import createTable
 import random
 import pickle
-from termgraph import Data, Args, BarChart
+from termgraph import Data, Args, BarChart # type: ignore
 import click
 
 @click.command(name="wordle")
