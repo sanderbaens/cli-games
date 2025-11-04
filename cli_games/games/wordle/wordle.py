@@ -3,6 +3,7 @@ from .getList import getList
 from .table import createTable
 import random
 import pickle
+from pathlib import Path
 from termgraph import Data, Args, BarChart # type: ignore
 import click
 
@@ -28,19 +29,31 @@ def cmd(chart, clear):
         print()
         createTable(GUESSES, ALL_GUESSES)
         print()
+    
+    def get_data_path():
+        """
+        Returns the path to the user's local data file for Wordle.
+        Ensures the directory exists.
+        """
+        base_dir = Path.home() / ".local" / "share" / "cli-games" / "wordle"
+        base_dir.mkdir(parents=True, exist_ok=True)
+        return base_dir / "data.pkl"
 
     def readScores():
-        with open("cli_games/games/wordle/data.pkl", "rb") as f:
+        path = get_data_path()
+        if not path.exists():
+            clearScores()
+        with open(path, "rb") as f:
             data = pickle.load(f)
         return data
-    
+
     def writeScores(data):
-        with open("cli_games/games/wordle/data.pkl", "wb") as f:
+        with open(get_data_path(), "wb") as f:
             pickle.dump(data, f)
 
     def clearScores():
         data = [[0], [0], [0], [0], [0], [0], [0]]
-        with open("cli_games/games/wordle/data.pkl", "wb") as f:
+        with open(get_data_path(), "wb") as f:
             pickle.dump(data, f)
 
     def updateScores(numberOfGuesses):
