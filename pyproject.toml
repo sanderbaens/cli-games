@@ -4,6 +4,7 @@ version = "1.0"
 description = "CLI tool build with click to play games in terminal"
 dependencies = [
     "click>=8.0.0",
+    "termgraph>=0.7.4"
 ]
 
 [project.scripts]

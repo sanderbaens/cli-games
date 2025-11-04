@@ -2,10 +2,14 @@ from ...lib.colors import Color
 from .getList import getList
 from .table import createTable
 import random
+import pickle
+from termgraph import Data, Args, BarChart
 import click
 
 @click.command(name="wordle")
-def cmd():
+@click.option("--chart", is_flag=True, help="Show a chart of your scores and exit.")
+@click.option("--clear", is_flag=True, help="Clear scores and exit.")
+def cmd(chart, clear):
     """
     Play the classic Wordle game in your terminal.
 
@@ -16,15 +20,6 @@ def cmd():
       - Yellow if they are in the word but in the wrong position
       - White if they are not in the word
     """
-    
-    possible_answers = getList("possible answers.json")
-    valid_guesses = getList("both.json")
-    ALL_GUESSES = []
-    POSSIBLE_LETTERS = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
-    GUESSES = 6
-    VALID = True
-
-    wordToGuess = random.choice(possible_answers)
 
     def printState():
         print("\033c", end="")
@@ -34,8 +29,49 @@ def cmd():
         createTable(GUESSES, ALL_GUESSES)
         print()
 
-    numberOfGuesses = 0
-    while numberOfGuesses < GUESSES:
+    def readScores():
+        with open("cli_games/games/wordle/data.pkl", "rb") as f:
+            data = pickle.load(f)
+        return data
+    
+    def writeScores(data):
+        with open("cli_games/games/wordle/data.pkl", "wb") as f:
+            pickle.dump(data, f)
+
+    def clearScores():
+        data = [[0], [0], [0], [0], [0], [0], [0]]
+        with open("cli_games/games/wordle/data.pkl", "wb") as f:
+            pickle.dump(data, f)
+
+    def updateScores(numberOfGuesses):
+        scores = readScores()
+        scores[numberOfGuesses][0] += 1
+        writeScores(scores)
+
+    if chart:
+        scores = Data(readScores(), ["X", "1", "2", "3", "4", "5", "6"])
+        args = Args(
+            title="Scores",
+            width=50,
+            format="{:.0f}"
+        )
+        chartToShow = BarChart(scores, args)
+        chartToShow.draw()
+        return
+
+    if clear:
+        clearScores()
+        return    
+    
+    possible_answers = getList("possible answers.json")
+    valid_guesses = getList("both.json")
+    ALL_GUESSES = []
+    POSSIBLE_LETTERS = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+    GUESSES = 6
+    VALID = True
+    wordToGuess = random.choice(possible_answers)
+
+    while len(ALL_GUESSES) < GUESSES:
 
         if VALID: printState()
         else: VALID = True
@@ -72,9 +108,10 @@ def cmd():
         if inputText == wordToGuess:
             printState()
             print(Color.GREEN + "Congratulations, you guessed the word =)" + Color.END)
+            updateScores(len(ALL_GUESSES))
             break
 
-        numberOfGuesses += 1
-        if numberOfGuesses == GUESSES:
+        if len(ALL_GUESSES) == GUESSES:
             printState()
             print(f"{Color.RED}You couldn't guess the word --> {wordToGuess}{Color.END}")
+            updateScores(0)
