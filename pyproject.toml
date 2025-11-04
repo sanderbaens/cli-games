@@ -2,13 +2,10 @@
 name = "cli-games"
 version = "1.0"
 description = "CLI tool build with click to play games in terminal"
-dependencies = [
-    "click>=8.0.0",
-    "termgraph>=0.7.4"
-]
+dependencies = ["click>=8.0.0", "termgraph>=0.7.4"]
 
 [project.scripts]
 cli-games = "cli_games.cli:main"
 
 [tool.setuptools.package-data]
-cli_games = ["**/*.json"]
+cli_games = ["**/*.json", "**/*.pkl"]
